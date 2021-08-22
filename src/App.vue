@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <a-config-provider :locale="zhCN">
+    <a-config-provider>
       <router-view />
     </a-config-provider>
   </div>

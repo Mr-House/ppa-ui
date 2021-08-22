@@ -20,7 +20,9 @@
           </div>
         </div>
       </a-layout-header>
-      <a-layout-content class="custom-content">content</a-layout-content>
+      <a-layout-content class="custom-content">
+        <router-view></router-view>
+      </a-layout-content>
     </a-layout>
   </a-layout>
 </template>

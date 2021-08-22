@@ -9,8 +9,8 @@
       :columns="columns"
       rowKey="id"
       :data-source="list"
-      bordered
       :scroll="{ x: 100 }"
+      bordered
       :pagination="pagination"
       :loading="loading"
       @change="handlePageChange"
@@ -37,7 +37,7 @@
       </template>
     </a-table>
     <a-modal
-      title="合同创建"
+      title="商品维护"
       v-model:visible="visible"
       width="60%"
       :footer="null"
@@ -56,61 +56,51 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { message } from 'ant-design-vue'
+import { onMounted, computed, ref } from 'vue'
+import { useStore } from 'vuex'
 import detail from './components/detail.vue'
-import { page, deleteContract } from './api'
-const columns = [
+import { message } from 'ant-design-vue'
+import { page, deleteGoods } from './api'
+const columns = ref([
   {
-    title: '合同号',
+    title: '商品编码',
     dataIndex: 'code',
-    align: 'center',
-    width: 100,
-  },
-  {
-    title: '申领时间',
-    dataIndex: 'applyTime',
-    align: 'center',
-    width: 100,
-  },
-  {
-    title: '类型',
-    dataIndex: 'type',
-    align: 'center',
-    width: 80,
-  },
-  {
-    title: '经手人',
-    dataIndex: 'email',
-    align: 'center',
-    width: 80,
-  },
-  {
-    title: '归还状态',
-    dataIndex: 'settlement',
     align: 'center',
     ellipsis: true,
     width: 130,
   },
   {
-    title: '归还时间',
-    dataIndex: 'returnTime',
+    title: '商品名称',
+    dataIndex: 'name',
+    align: 'center',
+    ellipsis: true,
+    width: 100,
+  },
+  {
+    title: '商品类型',
+    dataIndex: 'type',
     align: 'center',
     ellipsis: true,
     width: 150,
   },
   {
-    title: '转移记录',
-    dataIndex: 'idCard',
+    title: '商品描述',
+    dataIndex: 'description',
+    align: 'center',
+    width: 90,
+  },
+  {
+    title: '基准价格',
+    dataIndex: 'price',
     align: 'center',
     ellipsis: true,
     width: 220,
   },
   {
     title: '备注',
-    dataIndex: 'follower',
+    dataIndex: 'remark',
     align: 'center',
-    width: 90,
+    width: 100,
   },
   {
     title: '操作',
@@ -119,9 +109,11 @@ const columns = [
     width: 250,
     slots: { customRender: 'operation' },
   },
-]
-const list = ref([])
+])
 
+const list: any = ref([])
+
+const visible = ref(false)
 const loading = ref(false)
 const conditions = ref({
   current: 1,
@@ -138,17 +130,9 @@ const pagination = {
   showSizeChanger: true,
 }
 
-const visible = ref(false)
+const store = useStore()
 
-const search = async () => {
-  conditions.value.current = pagination.current
-  conditions.value.size = pagination.pageSize
-  const response: any = await page(conditions.value)
-  if (response.data) {
-    pagination.total = response.data.total
-    list.value = response.data.records
-  }
-}
+const goodsType = computed(() => store.getters.dicts.goods_type)
 
 const add = () => {
   visible.value = true
@@ -156,6 +140,24 @@ const add = () => {
 
 const handleOk = () => {
   visible.value = false
+}
+
+const search = () => {
+  conditions.value.current = pagination.current
+  conditions.value.size = pagination.pageSize
+  page(conditions.value).then((response: any) => {
+    if (response.data) {
+      pagination.total = response.data.total
+      list.value = response.data.records
+      list.value.forEach((item: any) => {
+        const ctIndex = goodsType.value.findIndex((el: any) => el.value === item.type)
+        if (ctIndex !== -1) {
+          item.type = goodsType.value[ctIndex].label
+        }
+        item.price = item.price / 100
+      })
+    }
+  })
 }
 
 const handlePageChange = (pageInfo: { current: number; pageSize: number }) => {
@@ -185,7 +187,7 @@ const view = (record: any) => {
 
 const deleteRecord = (index: any) => {
   const row: any = list.value[index]
-  deleteContract(row.id).then((response: any) => {
+  deleteGoods(row.id).then((response: any) => {
     if (response && response.status === 200) {
       message.success('删除成功')
       list.value.splice(index, 1)

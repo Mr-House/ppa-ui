@@ -16,7 +16,7 @@
               v-model:value="form[item.field]"
             ></a-input>
             <a-select
-              v-if="item.type === 'select'"
+              v-if="item.type === 'select' && item.dictType"
               v-model:value="form[item.field]"
               style="width: 250px"
               :disabled="formStatus === 'view'"
@@ -39,7 +39,7 @@
       </div>
       <a-table
         :columns="contactColumns"
-        :rowKey="(record) => record.id || Math.random()"
+        :rowKey="record => record.id || Math.random()"
         :data-source="contacts"
         :scroll="{ x: 100 }"
         bordered
@@ -50,7 +50,7 @@
             <a-input
               :value="text"
               :disabled="formStatus === 'view'"
-              @change="(e) => handleChange(e.target.value, index, col)"
+              @change="e => handleChange(e.target.value, index, col)"
             ></a-input>
           </div>
         </template>
@@ -67,13 +67,16 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useStore } from 'vuex';
 import { saveCustomer, updateCustomer, getCustomer } from '../api';
 import { message } from 'ant-design-vue';
+import type { Field } from '@/interface/index'
 
 const props = defineProps({
   id: String,
   formStatus: String,
 });
 
-const fields = ref([
+const emit = defineEmits(['refresh', 'cancel'])
+
+const fields = ref<Field[]>([
   {
     type: 'input',
     field: 'name',

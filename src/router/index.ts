@@ -28,7 +28,12 @@ const router = createRouter(
             name: 'contract',
           },
         ]
-      }
+      },
+      {
+        path: '/login',
+        name: 'login',
+        component: () => import(/* webpackChunkName: "login" */ '../views/login/Login.vue'),
+      },
     ],
   }
 );

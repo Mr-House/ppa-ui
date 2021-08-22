@@ -1,13 +1,10 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <hello-world msg="Hello Vue 3.0 + Vite" />
+  <div id="app">
+    <a-config-provider :locale="zhCN">
+      <router-view />
+    </a-config-provider>
+  </div>
 </template>
-<script>
-import HelloWorld from './components/HelloWorld.vue'
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+<script lang="ts" setup>
+import Layout from './views/layout/Layout.vue';
 </script>
